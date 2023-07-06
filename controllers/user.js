@@ -1,15 +1,13 @@
 const User = require("../models/Users");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 const registerController = async (req, res) => {
   try {
     const existingUser = await User.findOne({ email: req.body.email });
     if (existingUser) {
       return res.status(200).send({
         message: "User Already Exist",
-        data: {
-          user: existingUser,
-        },
         success: false,
       });
     }
@@ -93,4 +91,32 @@ const loginController = async (req, res) => {
     });
   }
 };
-module.exports = { loginController, registerController };
+
+const authController = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.body.userId });
+    if (!user) {
+      return res.status(200).send({
+        message: "User not found",
+        success: false,
+      });
+    } else {
+      console.log(user);
+      return res.status(200).send({
+        message: "Register Successfully",
+        data: {
+          user,
+        },
+        success: true,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: `Auth error`,
+    });
+  }
+};
+
+module.exports = { loginController, registerController, authController };

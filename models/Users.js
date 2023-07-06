@@ -35,12 +35,21 @@ const UserSchema = new mongoose.Schema(
     isAdmin: {
       type: Boolean,
       default: false,
-      select: false,
+    },
+    isDoctor: {
+      type: Boolean,
+      default: false,
+    },
+    notification: {
+      type: Array,
+      default: [],
+    },
+    seenNotification: {
+      type: Array,
+      default: [],
     },
   },
   { timestamps: true }
 );
-
-
 
 module.exports = mongoose.model("User", UserSchema);
