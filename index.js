@@ -17,24 +17,22 @@ app.use(cors());
 
 app.use("/api/v1/user", userRoute);
 
-
 //connect with database
 const connect = async () => {
-	try {
-		await mongoose.connect(process.env.MONGODB);
-		console.log("Connected".bgYellow);
-	} catch (error) {
-		throw error;
-	}
+  try {
+    await mongoose.connect(process.env.MONGODB);
+    console.log("Connected".bgYellow);
+  } catch (error) {
+    throw error;
+  }
 };
 
 mongoose.connection.on("disconnected", () => {
-	console.log("disconnected");
+  console.log("disconnected");
 });
 mongoose.connection.on("connected", () => {
-	console.log("connected".bgGreen);
+  console.log("connected".bgGreen);
 });
-
 
 //routes
 
@@ -46,7 +44,6 @@ app.get("/", (req, res) => {
 const port = process.env.PORT || 8000;
 
 app.listen(port, () => {
-    connect();
-    console.log(`server running on ${port}`.bgBlue);
-    
+  connect();
+  console.log(`server running on ${port}`.bgBlue);
 });
