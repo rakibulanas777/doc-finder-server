@@ -5,6 +5,8 @@ const colors = require("colors");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const userRoute = require("./routes/user");
+const adminRoute = require("./routes/admin");
+const doctorRoute = require("./routes/doctor");
 //rest objects
 
 const app = express();
@@ -16,6 +18,8 @@ app.use(morgan("dev"));
 app.use(cors());
 
 app.use("/api/v1/user", userRoute);
+app.use("/api/v1/admin", adminRoute);
+app.use("/api/v1/doctor", doctorRoute);
 
 //connect with database
 const connect = async () => {
