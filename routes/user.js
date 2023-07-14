@@ -11,6 +11,8 @@ const {
   bookAppointmnetController,
   bookingAvailabilityController,
   userAppointmentsController,
+  updateProfileController,
+  getUserInfoController,
 } = require("../controllers/user");
 const { protect } = require("../middlewares/authMiddleware");
 
@@ -28,7 +30,9 @@ router.post(
 );
 
 router.post("/getAllDoctors", protect, getAllDocotrsController);
+router.post("/getUserInfo", protect, getUserInfoController);
 router.post("/book-appointment", protect, bookAppointmnetController);
+router.post("/updateUserProfile", protect, updateProfileController);
 router.post("/booking-availbility", protect, bookingAvailabilityController);
 router.get("/user-appointments", protect, userAppointmentsController);
 module.exports = router;

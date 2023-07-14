@@ -212,6 +212,47 @@ const getAllDocotrsController = async (req, res) => {
   }
 };
 
+const updateProfileController = async (req, res) => {
+  try {
+    const user = await User.findOneAndUpdate(
+      { userId: req.body.userId },
+      req.body
+    );
+    await user.save();
+    console.log(user);
+    res.status(201).send({
+      success: true,
+      message: "User Profile Updated",
+      data: user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "User Profile Update issue",
+      error,
+    });
+  }
+};
+
+const getUserInfoController = async (req, res) => {
+  try {
+    const user = await User.findOne({ userId: req.body.userId });
+    res.status(200).send({
+      success: true,
+      message: "doctor data fetch success",
+      data: user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Error in Fetching Doctor Details",
+    });
+  }
+};
+
 //BOOK APPOINTMENT
 const bookAppointmnetController = async (req, res) => {
   try {
@@ -306,7 +347,9 @@ module.exports = {
   getAllNotificationController,
   deleteAllNotificationController,
   getAllDocotrsController,
+  getUserInfoController,
   bookAppointmnetController,
   bookingAvailabilityController,
   userAppointmentsController,
+  updateProfileController,
 };
