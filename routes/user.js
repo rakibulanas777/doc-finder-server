@@ -29,7 +29,7 @@ router.post(
   deleteAllNotificationController
 );
 
-router.post("/getAllDoctors", protect, getAllDocotrsController);
+router.post("/getAllDoctors", getAllDocotrsController);
 router.post("/getUserInfo", protect, getUserInfoController);
 router.post("/book-appointment", protect, bookAppointmnetController);
 router.post("/updateUserProfile", protect, updateProfileController);
