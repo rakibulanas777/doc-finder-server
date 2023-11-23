@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const appointmentSchema = new mongoose.Schema(
   {
     userId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     doctorId: {
@@ -11,7 +12,8 @@ const appointmentSchema = new mongoose.Schema(
       required: true,
     },
     doctorInfo: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Doctor",
       required: true,
     },
     userInfo: {
@@ -21,6 +23,10 @@ const appointmentSchema = new mongoose.Schema(
     date: {
       type: String,
       required: true,
+    },
+    paid: {
+      type: Boolean,
+      default: false,
     },
     status: {
       type: String,

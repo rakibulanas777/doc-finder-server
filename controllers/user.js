@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken");
 const Doctor = require("../models/Doctor");
 const appointmentModel = require("../models/appointmentModel");
 const moment = require("moment");
+const stripe = require("stripe")(
+  "sk_test_51LM2J1SIiDyURhxDcwcDsr2pkYCLeu8MVqvXDNb5Dgap0qkfEBn1O8H0GHos3NHaS68eWsR1ocBhbniPOLgHG5AL00WDJsrnCf"
+);
 
 const registerController = async (req, res) => {
   try {
@@ -256,20 +259,60 @@ const getUserInfoController = async (req, res) => {
 //BOOK APPOINTMENT
 const bookAppointmnetController = async (req, res) => {
   try {
+    console.log("Original Date:", req.body.date);
+    console.log("Original Time:", req.body.time);
+
+    // Convert date
     req.body.date = moment(req.body.date, "DD-MM-YYYY").toISOString();
+    console.log("Converted Date:", req.body.date);
+
     req.body.time = moment(req.body.time, "HH:mm").toISOString();
+
     req.body.status = "pending";
+
     const newAppointment = new appointmentModel(req.body);
     await newAppointment.save();
+    const { doctorInfo } = req.body;
+
+    const findAppoinment = await appointmentModel
+      .findOne({ doctorInfo: doctorInfo })
+      .populate("doctorInfo");
+    console.log(findAppoinment);
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `paid to ${findAppoinment.doctorInfo.name}`, // Product name
+            },
+            unit_amount: findAppoinment.doctorInfo.feesPerConsaltation * 100, // Amount in cents
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: "http://localhost:5173/", // Redirect URL after successful payment
+      cancel_url: "http://localhost:5173/", // Redirect URL if payment is canceled
+    });
+
+    newAppointment.paid = true;
+    await newAppointment.save();
+
     const user = await User.findOne({ _id: req.body.doctorInfo.userId });
+
     user.notification.push({
       type: "New-appointment-request",
-      message: `A nEw Appointment Request from ${req.body.userInfo.name}`,
+      message: `A new Appointment Request from ${req.body.userInfo.name}`,
       onCLickPath: "/user/appointments",
     });
+
     await user.save();
+
     res.status(200).send({
       success: true,
+      id: session.id,
       message: "Appointment Book succesfully",
     });
   } catch (error) {
@@ -284,11 +327,12 @@ const bookAppointmnetController = async (req, res) => {
 
 const bookingAvailabilityController = async (req, res) => {
   try {
-    const date = moment(req.body.date, "DD-MM-YY").toISOString();
+    const date = moment(req.body.date, "DD-MM-YYYY").toISOString();
     const fromTime = moment(req.body.time, "HH:mm")
       .subtract(1, "hours")
       .toISOString();
     const toTime = moment(req.body.time, "HH:mm").add(1, "hours").toISOString();
+
     const doctorId = req.body.doctorId;
     const appointments = await appointmentModel.find({
       doctorId,
@@ -298,10 +342,11 @@ const bookingAvailabilityController = async (req, res) => {
         $lte: toTime,
       },
     });
+
     if (appointments.length > 0) {
       return res.status(200).send({
         message: "Appointments not Availibale at this time",
-        success: true,
+        success: false,
       });
     } else {
       return res.status(200).send({

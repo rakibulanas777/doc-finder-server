@@ -1,6 +1,26 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+
+const ReviewSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: String,
+      // You can add more validation or customization specific to reviews
+    },
+    rating: {
+      type: Number,
+      required: [true, "Rating is required"],
+      min: [1, "Rating must be at least 1"],
+      max: [5, "Rating must be at most 5"],
+    },
+    comment: {
+      type: String,
+    },
+  },
+  { timestamps: true }
+);
+
 const DoctorSchema = new mongoose.Schema(
   {
     userId: {
@@ -45,6 +65,7 @@ const DoctorSchema = new mongoose.Schema(
       type: Object,
       required: [true, "worked time is required"],
     },
+    reviews: [ReviewSchema],
   },
   { timestamps: true }
 );

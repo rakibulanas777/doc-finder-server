@@ -1,6 +1,9 @@
 const Doctor = require("../models/Doctor");
 const appointmentModel = require("../models/appointmentModel");
 const User = require("../models/Users");
+const stripe = require("stripe")(
+  "sk_test_51LM2J1SIiDyURhxDcwcDsr2pkYCLeu8MVqvXDNb5Dgap0qkfEBn1O8H0GHos3NHaS68eWsR1ocBhbniPOLgHG5AL00WDJsrnCf"
+);
 const getDoctorInfoController = async (req, res) => {
   try {
     const doctor = await Doctor.findOne({ userId: req.body.userId });
@@ -27,7 +30,7 @@ const updateProfileController = async (req, res) => {
       req.body
     );
     await doctor.save();
-    console.log(doctor);
+
     res.status(201).send({
       success: true,
       message: "Doctor Profile Updated",
@@ -65,9 +68,13 @@ const getDoctorByIdController = async (req, res) => {
 const doctorAppointmentsController = async (req, res) => {
   try {
     const doctor = await Doctor.findOne({ userId: req.body.userId });
-    const appointments = await appointmentModel.find({
-      doctorId: doctor._id,
-    });
+    const appointments = await appointmentModel
+      .find({
+        doctorId: doctor._id,
+      })
+      .populate("userId")
+      .sort({ createdAt: -1 });
+
     res.status(200).send({
       success: true,
       message: "Doctor Appointments fetch Successfully",
