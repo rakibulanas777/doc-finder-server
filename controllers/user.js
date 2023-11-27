@@ -241,6 +241,7 @@ const updateProfileController = async (req, res) => {
 const getUserInfoController = async (req, res) => {
   try {
     const user = await User.findOne({ userId: req.body.userId });
+    console.log(user);
     res.status(200).send({
       success: true,
       message: "doctor data fetch success",
