@@ -200,6 +200,7 @@ const deleteAllNotificationController = async (req, res) => {
 const getAllDocotrsController = async (req, res) => {
   try {
     const doctors = await Doctor.find({ status: "approved" });
+
     res.status(200).send({
       success: true,
       message: "Docots Lists Fetched Successfully",
@@ -367,9 +368,13 @@ const bookingAvailabilityController = async (req, res) => {
 
 const userAppointmentsController = async (req, res) => {
   try {
-    const appointments = await appointmentModel.find({
-      userId: req.body.userId,
-    });
+    const appointments = await appointmentModel
+      .find({
+        userId: req.body.userId,
+      })
+      .populate("userId")
+      .populate("doctorInfo")
+      .sort({ createdAt: -1 });
     res.status(200).send({
       success: true,
       message: "Users Appointments Fetch SUccessfully",
@@ -385,10 +390,54 @@ const userAppointmentsController = async (req, res) => {
   }
 };
 
+const createReviewController = async (req, res) => {
+  try {
+    const { doctorId, rating, comment, userId } = req.body;
+    console.log(req.body);
+    // Check if the doctor exists
+    const doctor = await Doctor.findById(doctorId);
+
+    if (!doctor) {
+      return res.status(404).send({
+        success: false,
+        message: "Doctor not found",
+      });
+    }
+    // Assuming `doctor` is an instance of the Doctor model
+    await doctor.calculateReviewsAndRating();
+
+    // Create a new review
+    const newReview = {
+      userId: userId, // Assuming you have the user ID in the req.user object
+      rating: rating,
+      comment: comment,
+      createdAt: new Date(),
+    };
+
+    doctor.reviews.push(newReview);
+
+    await doctor.save();
+
+    res.status(201).send({
+      success: true,
+      message: "Review created successfully",
+      data: doctor,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Error in creating review",
+    });
+  }
+};
+
 module.exports = {
   loginController,
   registerController,
   authController,
+  createReviewController,
   applyDoctorController,
   getAllNotificationController,
   deleteAllNotificationController,

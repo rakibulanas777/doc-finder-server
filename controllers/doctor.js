@@ -7,6 +7,7 @@ const stripe = require("stripe")(
 const getDoctorInfoController = async (req, res) => {
   try {
     const doctor = await Doctor.findOne({ userId: req.body.userId });
+
     res.status(200).send({
       success: true,
       message: "doctor data fetch success",
@@ -50,6 +51,7 @@ const updateProfileController = async (req, res) => {
 const getDoctorByIdController = async (req, res) => {
   try {
     const doctor = await Doctor.findOne({ _id: req.body.doctorId });
+    await doctor.calculateReviewsAndRating();
     res.status(200).send({
       success: true,
       message: "Sigle Doc Info Fetched",
@@ -122,6 +124,42 @@ const doctorAppointmentsController = async (req, res) => {
         totalRevenue,
       });
     }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Error in Doc Appointments",
+    });
+  }
+};
+const revenueController = async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.body.userId });
+
+    const appointments = await appointmentModel
+      .find({
+        doctorId: doctor._id,
+      })
+      .populate("userId")
+      .populate("doctorInfo")
+      .sort({ createdAt: -1 });
+
+    let totalAppointments = appointments.length;
+    let totalRevenue = 0;
+    // console.log(appointments);
+    if (totalAppointments > 0) {
+      totalRevenue = appointments.reduce((acc, appointment) => {
+        return acc + appointment.doctorInfo.feesPerConsaltation;
+      }, 0);
+    }
+
+    res.status(200).send({
+      success: true,
+      message: "Doctor Appointments fetch Successfully",
+      totalAppointments,
+      totalRevenue,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -225,6 +263,7 @@ module.exports = {
   updateProfileController,
   getDoctorByIdController,
   updateStatusController,
+  revenueController,
   markCompleteController,
   doctorAppointmentsController,
 };

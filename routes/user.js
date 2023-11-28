@@ -13,6 +13,7 @@ const {
   userAppointmentsController,
   updateProfileController,
   getUserInfoController,
+  createReviewController,
 } = require("../controllers/user");
 const { protect } = require("../middlewares/authMiddleware");
 
@@ -28,7 +29,7 @@ router.post(
   protect,
   deleteAllNotificationController
 );
-
+router.post("/addreviews", createReviewController);
 router.get("/getAllDoctors", getAllDocotrsController);
 router.post("/getUserInfo", protect, getUserInfoController);
 router.post("/book-appointment", protect, bookAppointmnetController);

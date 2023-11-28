@@ -9,6 +9,7 @@ const {
   updateStatusController,
   getApprovedAppointmentsController,
   markCompleteController,
+  revenueController,
 } = require("../controllers/doctor");
 
 const router = express.Router();
@@ -24,6 +25,7 @@ router.post("/getDoctorById", protect, getDoctorByIdController);
 router.put("/appointments/:appointmentId/complete", markCompleteController);
 router.get("/doctor-appointments", protect, doctorAppointmentsController);
 
+router.get("/revenue", protect, revenueController);
 router.post("/update-status", protect, updateStatusController);
 
 module.exports = router;

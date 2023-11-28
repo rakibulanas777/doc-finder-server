@@ -6,8 +6,16 @@ const ReviewSchema = new mongoose.Schema(
   {
     userId: {
       type: String,
-      // You can add more validation or customization specific to reviews
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
+
+    // doctorInfo: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Doctor",
+    //   required: true,
+    // },
     rating: {
       type: Number,
       required: [true, "Rating is required"],
@@ -66,8 +74,35 @@ const DoctorSchema = new mongoose.Schema(
       required: [true, "worked time is required"],
     },
     reviews: [ReviewSchema],
+    totalReviews: {
+      type: Number,
+      default: 0,
+    },
+    averageRating: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
+
+DoctorSchema.methods.calculateReviewsAndRating = function () {
+  const totalReviews = this.reviews.length;
+
+  if (totalReviews === 0) {
+    this.totalReviews = 0;
+    this.averageRating = 0;
+  } else {
+    const sumOfRatings = this.reviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+    this.totalReviews = totalReviews;
+    this.averageRating = sumOfRatings / totalReviews;
+  }
+
+  // Save the updated doctor document
+  return this.save();
+};
 
 module.exports = mongoose.model("Doctor", DoctorSchema);
